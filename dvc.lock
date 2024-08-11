@@ -1,0 +1,101 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/data/data_ingestion.py
+    deps:
+    - path: C:\Users\erdrr\OneDrive\Desktop\KB\Projects\EXTERNAL_DATA\tweet_emotions.csv
+      hash: md5
+      md5: 49fec64512508d3c26b32944337b89c5
+      size: 3768204
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: 98634233282d300b9581d59863e61b6a
+      size: 5458
+    params:
+      params.yaml:
+        data_ingestion.test_size: 0.25
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 45fd8b56512600a85086dd91d8af6950.dir
+      size: 1006158
+      nfiles: 2
+  data_preprocessing:
+    cmd: python src/data/data_preprocessing.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 45fd8b56512600a85086dd91d8af6950.dir
+      size: 1006158
+      nfiles: 2
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: cb7772f568322c89dd8a0437f9a54a7d
+      size: 7145
+    outs:
+    - path: data/interim
+      hash: md5
+      md5: 99289db82ecbc7d20524c5bfef06cb2e.dir
+      size: 693605
+      nfiles: 2
+  feature_engineering:
+    cmd: python src/features/feature_engineering.py
+    deps:
+    - path: data/interim
+      hash: md5
+      md5: 99289db82ecbc7d20524c5bfef06cb2e.dir
+      size: 693605
+      nfiles: 2
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: 9be66f57acbcb283e0b8dc95fa271b49
+      size: 6876
+    params:
+      params.yaml:
+        feature_engineering.max_features: 800
+        feature_engineering.model_type: tfidf
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 2c6fc81bea82aaade1c6748cffb202f5.dir
+      size: 45124052
+      nfiles: 2
+  model_building:
+    cmd: python src/models/model_building.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 2c6fc81bea82aaade1c6748cffb202f5.dir
+      size: 45124052
+      nfiles: 2
+    - path: src/models/model_building.py
+      hash: md5
+      md5: 5e64f88518b4941fe78709e878a631a5
+      size: 5685
+    params:
+      params.yaml:
+        model_building.learning_rate: 0.1
+        model_building.max_depth: 750
+        model_building.n_estimators: 750
+    outs:
+    - path: models
+      hash: md5
+      md5: ebd2173292aeb2f0d96a19896e79affa.dir
+      size: 7116
+      nfiles: 1
+  model_evaluation:
+    cmd: python src/models/evaluate.py
+    deps:
+    - path: models/model.pkl
+      hash: md5
+      md5: 355530af0fdb04a505a315732a2fe1a7
+      size: 7116
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: af6bedb17934f2cb9d482b725e696242
+      size: 6933
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 9bb299aadfe85ffa299229b0c13b8e02
+      size: 144
