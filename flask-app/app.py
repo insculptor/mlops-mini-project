@@ -27,6 +27,7 @@ def get_latest_model_version(model_name):
     latest_version = client.get_latest_versions(model_name, stages=["Production"])
     if not latest_version:
         latest_version = client.get_latest_versions(model_name, stages=["None"])
+    print(f"[INFO] Latest model version: {latest_version[0].version}") if latest_version else print("[INFO] No model version found")
     return latest_version[0].version if latest_version else None
 
 model_name = "model"
