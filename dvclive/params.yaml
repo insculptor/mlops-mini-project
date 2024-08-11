@@ -1,7 +1,7 @@
 data_ingestion_test_size: 0.25
-feature_engineering_max_features: 800
+feature_engineering_max_features: 4000
 feature_engineering_model_type: tfidf
-model_building_n_estimators: 750
+model_building_n_estimators: 4000
 model_building_learning_rate: 0.1
-model_building_max_depth: 750
+model_building_max_depth: None
 model_building_random_state: 42
