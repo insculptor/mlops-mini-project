@@ -193,8 +193,7 @@ def main():
     mlflow.set_experiment("dvc-pipeline")
     with mlflow.start_run() as run:  # Start an MLflow run
         try:
-            clf = load_model(model_path)            
-
+            clf = load_model(model_path)           
             metrics = evaluate_model(clf, X_test, y_test)
                         
             # Log metrics to MLflow

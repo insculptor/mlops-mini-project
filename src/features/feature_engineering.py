@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
+import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from dotenv import load_dotenv
@@ -108,7 +109,9 @@ def apply_bag_of_words(train_data: pd.DataFrame, test_data: pd.DataFrame, max_fe
     vectorizer = CountVectorizer(max_features=max_features)
     X_train_bow = vectorizer.fit_transform(X_train)
     X_test_bow = vectorizer.transform(X_test)
-
+    
+    vectorizer_file_path = os.path.join(Path(os.environ["BASE_MODELS_DIR"]),"vectorizer.pkl")
+    pickle.dump(vectorizer, open(vectorizer_file_path,'wb'))
     return X_train_bow, y_train, X_test_bow, y_test
 
 def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features: int) -> tuple:
@@ -131,6 +134,9 @@ def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features:
     vectorizer = TfidfVectorizer(max_features=max_features)
     X_train_bow = vectorizer.fit_transform(X_train)
     X_test_bow = vectorizer.transform(X_test)
+    
+    vectorizer_file_path = os.path.join(Path(os.environ["BASE_MODELS_DIR"]),"vectorizer.pkl")
+    pickle.dump(vectorizer, open(vectorizer_file_path,'wb'))
 
     return X_train_bow, y_train, X_test_bow, y_test
 
