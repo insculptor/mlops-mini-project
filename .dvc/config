@@ -1,4 +1,6 @@
 [core]
-    remote = local_remote
+    remote = dvc_s3_store
+['remote "dvc_s3_store"']
+    url = s3://insculptor-aws-bucket
 ['remote "local_remote"']
     url = C:\Users\erdrr\OneDrive\Desktop\KB\Projects\dvc-local-remote\
