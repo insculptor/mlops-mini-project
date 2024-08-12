@@ -24,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools --upgrade
           pip install dvc dvc[s3] dvc[all]
-          pip install --upgrade
+          pip install dvc --upgrade
           pip install awscli
           pip install -r requirements.txt
 
