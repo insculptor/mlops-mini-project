@@ -78,7 +78,7 @@ def read_data(data_path: str) -> pd.DataFrame:
         pd.errors.ParserError: If there is an error parsing the CSV file.
     """
     try:
-        df = pd.read_csv(os.path.join(data_path, 'tweet_emotions.csv'))
+        df = pd.read_csv(data_path)
         return df
     except FileNotFoundError:
         logger.error("[ERROR]: Data file not found.")
@@ -149,7 +149,8 @@ def main():
     try:
         params_path = 'params.yaml'
         test_size = load_params(params_path)
-        df = read_data(external_data_path)
+        #df = read_data(data_url='https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv')
+        df = pd.read_csv('https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv')
         df = process_data(df)
         save_data(df, test_size, raw_data_path)
     except Exception as e:
