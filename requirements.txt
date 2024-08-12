@@ -32,8 +32,6 @@ click-didyoumean~=0.3.1
 click-plugins~=1.1.1
 click-repl~=0.3.0
 cloudpickle~=3.0.0
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
-comm @ file:///home/conda/feedstock_root/build_artifacts/comm_1710320294760/work
 commonmark~=0.9.1
 configobj~=5.0.8
 contourpy~=1.2.1
@@ -44,8 +42,6 @@ dacite~=1.6.0
 dagshub~=0.3.34
 databricks-sdk~=0.29.0
 dataclasses-json~=0.6.7
-debugpy @ file:///C:/b/abs_c0y1fjipt2/croot/debugpy_1690906864587/work
-decorator @ file:///home/conda/feedstock_root/build_artifacts/decorator_1641555617451/work
 Deprecated~=1.2.14
 dictdiffer~=0.9.0
 diskcache~=5.6.3
