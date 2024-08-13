@@ -40,7 +40,7 @@ class TestModelLoading(unittest.TestCase):
     def get_latest_model_version(model_name):
         client = mlflow.MlflowClient()
         latest_version = client.get_latest_versions(model_name)
-        print(f"Got lastest Versions: {latest_version}")
+        print(f"Got latest Versions: {latest_version}")
         return latest_version[0].version if latest_version else None
 
     def test_model_loaded_properly(self):

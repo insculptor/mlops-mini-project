@@ -23,16 +23,16 @@ if not dagshub_token:
 os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
+# Set the MLflow tracking URI
+mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
 
 app = Flask(__name__)
 
 # load model from model registry
 def get_latest_model_version(model_name):
     client = mlflow.MlflowClient()
-    latest_version = client.get_latest_versions(model_name, stages=["Production"])
-    if not latest_version:
-        latest_version = client.get_latest_versions(model_name, stages=["None"])
-    print(f"[INFO] Latest model version: {latest_version[0].version}") if latest_version else print("[INFO] No model version found")
+    latest_version = client.get_latest_versions(model_name)
+    print(f"Got latest Versions: {latest_version}")
     return latest_version[0].version if latest_version else None
 
 model_name = "model"
