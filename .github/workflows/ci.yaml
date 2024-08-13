@@ -46,3 +46,8 @@ jobs:
           DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
         run: |
           python -m unittest tests/test_model.py
+      - name: Run Flask app tests
+        if: success()
+        env:
+          DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+        run: python -m unittest tests/test_flask_app.py

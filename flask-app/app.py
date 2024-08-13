@@ -13,10 +13,15 @@ from preprocessing_utility import normalize_text
 
 
 
-# Set up DagsHub credentials for MLflow tracking
-mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
-dagshub.init(repo_owner='insculptor', repo_name='mlops-mini-project', mlflow=True)  
-
+# Set up the MLflow tracking URI
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("[INFO]: Loading environment variables from .env file")
+    dagshub_token = os.getenv("DAGSHUB_PAT")
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
 
 app = Flask(__name__)
