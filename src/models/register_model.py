@@ -2,40 +2,31 @@ import os
 import json
 import logging
 import mlflow
-import dagshub
 from pathlib import Path
 
 # Set up the MLflow tracking URI
-# Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")
 if not dagshub_token:
-        from dotenv import load_dotenv
-        load_dotenv()
-        print("[INFO]: Loading environment variables from .env file")
-        dagshub_token = os.getenv("DAGSHUB_PAT")
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("[INFO]: Loading environment variables from .env file")
+    dagshub_token = os.getenv("DAGSHUB_PAT")
 os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
 # Set the MLflow tracking URI
 mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
 
-
 # Setup Paths
 base_dir = Path(__file__).resolve().parents[2]
 print(f"[INFO]: Base Directory:", base_dir)
-base_data_dir = os.path.join(base_dir, "data")
-os.makedirs(base_data_dir, exist_ok=True)
-raw_data_path = os.path.join(base_data_dir, "raw")
-os.makedirs(raw_data_path, exist_ok=True)
-reports_path = os.path.join(base_dir, "reports")
-os.makedirs(reports_path, exist_ok=True)
 base_model_dir = os.path.join(base_dir, "models")
 os.makedirs(base_model_dir, exist_ok=True)
-logger_path = os.path.join(base_dir, "logs")
+logger_path = os.path.join(base_dir, "logs", "model_registration.log")
 os.makedirs(os.path.dirname(logger_path), exist_ok=True)
-log_file = os.path.join(logger_path, "model_registration.log")
-model_path = os.path.join(Path(base_model_dir), "model.pkl")
-## Logging Configuration
+model_path = os.path.join(base_model_dir, "model.pkl")
+
+# Logging Configuration
 def setup_logger(log_file_path):
     os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
     logging.basicConfig(
@@ -45,8 +36,8 @@ def setup_logger(log_file_path):
     )
     logger = logging.getLogger()
     return logger
-logger = setup_logger(log_file)
 
+logger = setup_logger(logger_path)
 
 def load_model_info(file_path: str) -> dict:
     """Load the model info from a JSON file."""
@@ -63,7 +54,7 @@ def load_model_info(file_path: str) -> dict:
         raise
 
 def register_model(model_name: str, model_info: dict):
-    """Register the model to the MLflow Model Registry."""
+    """Register the model to the MLflow Model Registry and transition it to Staging and Production."""
     try:
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
         
@@ -78,11 +69,20 @@ def register_model(model_name: str, model_info: dict):
             version=model_version.version,
             stage="Staging"
         )
-        logger.info(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
+        logger.info(f'Model {model_name} version {model_version.version} transitioned to Staging.')
+
+        # Optionally, you can also transition to "Production"
+        client.transition_model_version_stage(
+            name=model_name,
+            version=model_version.version,
+            stage="Production"
+        )
+        logger.info(f'Model {model_name} version {model_version.version} transitioned to Production.')
+
     except Exception as e:
         logger.error('Error during model registration: %s', e)
         raise
-    
+
 def main():
     try:
         model_info_path = 'reports/experiment_info.json'
