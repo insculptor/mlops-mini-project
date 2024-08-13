@@ -54,16 +54,17 @@ def load_model_info(file_path: str) -> dict:
         raise
 
 def register_model(model_name: str, model_info: dict):
-    """Register the model to the MLflow Model Registry and transition it to Staging and Production."""
+    """Register the model to the MLflow Model Registry, transition to Staging, and manage Production."""
     try:
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
         
-        # Register the model
+        # Register the new model
         model_version = mlflow.register_model(model_uri, model_name)
         logger.info(f'Model {model_name} version {model_version.version} registered.')
         
-        # Transition the model to "Staging" stage
         client = mlflow.tracking.MlflowClient()
+
+        # Transition the new model to "Staging"
         client.transition_model_version_stage(
             name=model_name,
             version=model_version.version,
@@ -71,7 +72,17 @@ def register_model(model_name: str, model_info: dict):
         )
         logger.info(f'Model {model_name} version {model_version.version} transitioned to Staging.')
 
-        # Optionally, you can also transition to "Production"
+        # Archive the current production version, if it exists
+        current_production_versions = client.get_latest_versions(model_name, stages=["Production"])
+        for version in current_production_versions:
+            client.transition_model_version_stage(
+                name=model_name,
+                version=version.version,
+                stage="Archived"
+            )
+            logger.info(f'Model {model_name} version {version.version} archived from Production.')
+
+        # Transition the new model to "Production"
         client.transition_model_version_stage(
             name=model_name,
             version=model_version.version,
@@ -79,13 +90,17 @@ def register_model(model_name: str, model_info: dict):
         )
         logger.info(f'Model {model_name} version {model_version.version} transitioned to Production.')
 
-    except Exception as e:
-        logger.error('Error during model registration: %s', e)
+    except mlflow.exceptions.MlflowException as e:
+        logger.error('MLflow exception during model registration: %s', e)
         raise
+    except Exception as e:
+        logger.error('Unexpected error during model registration: %s', e)
+        raise
+
 
 def main():
     try:
-        model_info_path = 'reports/experiment_info.json'
+        model_info_path = 'reports/model_info.json'
         model_info = load_model_info(model_info_path)
         model_name = "model"
         logger.info('Registering model %s', model_name)
