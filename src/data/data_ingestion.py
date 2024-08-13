@@ -7,8 +7,7 @@ import logging
 from sklearn.model_selection import train_test_split
 
 
-
-# Get the base directory where the Python script is running
+# Setup Paths
 base_dir = Path(__file__).resolve().parents[2]
 print(f"[INFO]: Base Directory:", base_dir)
 base_data_dir = os.path.join(base_dir, "data")
@@ -16,19 +15,19 @@ os.makedirs(base_data_dir, exist_ok=True)
 raw_data_path = os.path.join(base_data_dir, "raw")
 os.makedirs(raw_data_path, exist_ok=True)
 logger_path = os.path.join(base_dir, "logs")
-
+os.makedirs(os.path.dirname(logger_path), exist_ok=True)
+log_file = os.path.join(logger_path, "data_ingestion.log")
 ## Logging Configuration
-logger = logging.getLogger(os.path.join(logger_path, "data_ingestion.log"))
-logger.setLevel(logging.DEBUG)
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-
-logger.addHandler(console_handler)
-
+def setup_logger(log_file_path):
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger()
+    return logger
+logger = setup_logger(log_file)
 
 def load_params(params_path: str) -> str:
     """

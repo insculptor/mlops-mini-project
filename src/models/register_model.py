@@ -5,13 +5,14 @@ import mlflow
 import dagshub
 from pathlib import Path
 
-
-
 # Set up the MLflow tracking URI
 # Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")
 if not dagshub_token:
-    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+        from dotenv import load_dotenv
+        load_dotenv()
+        print("[INFO]: Loading environment variables from .env file")
+        dagshub_token = os.getenv("DAGSHUB_PAT")
 os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
@@ -19,39 +20,40 @@ os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
 
 
+# Setup Paths
 base_dir = Path(__file__).resolve().parents[2]
 print(f"[INFO]: Base Directory:", base_dir)
+base_data_dir = os.path.join(base_dir, "data")
+os.makedirs(base_data_dir, exist_ok=True)
+raw_data_path = os.path.join(base_data_dir, "raw")
+os.makedirs(raw_data_path, exist_ok=True)
+reports_path = os.path.join(base_dir, "reports")
+os.makedirs(reports_path, exist_ok=True)
 base_model_dir = os.path.join(base_dir, "models")
 os.makedirs(base_model_dir, exist_ok=True)
-base_data_dir = os.path.join(base_dir, "data")
-
-
+logger_path = os.path.join(base_dir, "logs")
+os.makedirs(os.path.dirname(logger_path), exist_ok=True)
+log_file = os.path.join(logger_path, "model_registration.log")
 model_path = os.path.join(Path(base_model_dir), "model.pkl")
-logger_path = os.path.join(base_dir, "model_registration.log")
+## Logging Configuration
+def setup_logger(log_file_path):
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger()
+    return logger
+logger = setup_logger(log_file)
 
-# logging configuration
-logger = logging.getLogger(logger_path)
-logger.setLevel('DEBUG')
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel('DEBUG')
-
-file_handler = logging.FileHandler('model_registration_errors.log')
-file_handler.setLevel('ERROR')
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
-
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
 
 def load_model_info(file_path: str) -> dict:
     """Load the model info from a JSON file."""
     try:
         with open(file_path, 'r') as file:
             model_info = json.load(file)
-        logger.debug('Model info loaded from %s', file_path)
+        logger.info('Model info loaded from %s', file_path)
         return model_info
     except FileNotFoundError:
         logger.error('File not found: %s', file_path)
@@ -67,6 +69,7 @@ def register_model(model_name: str, model_info: dict):
         
         # Register the model
         model_version = mlflow.register_model(model_uri, model_name)
+        logger.info(f'Model {model_name} version {model_version.version} registered.')
         
         # Transition the model to "Staging" stage
         client = mlflow.tracking.MlflowClient()
@@ -75,8 +78,7 @@ def register_model(model_name: str, model_info: dict):
             version=model_version.version,
             stage="Staging"
         )
-        
-        logger.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
+        logger.info(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
     except Exception as e:
         logger.error('Error during model registration: %s', e)
         raise
@@ -85,8 +87,9 @@ def main():
     try:
         model_info_path = 'reports/experiment_info.json'
         model_info = load_model_info(model_info_path)
-        
         model_name = "model"
+        logger.info('Registering model %s', model_name)
+        logger.info('Model info: %s', model_info)
         register_model(model_name, model_info)
     except Exception as e:
         logger.error('Failed to complete the model registration process: %s', e)

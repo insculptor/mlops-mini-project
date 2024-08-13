@@ -4,8 +4,31 @@ import numpy as np
 import pandas as pd
 import yaml
 import pickle
+import logging
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Setup Paths
+base_dir = Path(__file__).resolve().parents[2]
+print(f"[INFO]: Base Directory:", base_dir)
+base_data_dir = os.path.join(base_dir, "data")
+os.makedirs(base_data_dir, exist_ok=True)
+raw_data_path = os.path.join(base_data_dir, "raw")
+os.makedirs(raw_data_path, exist_ok=True)
+logger_path = os.path.join(base_dir, "logs")
+os.makedirs(os.path.dirname(logger_path), exist_ok=True)
+log_file = os.path.join(logger_path, "feature_engineering.log")
+## Logging Configuration
+def setup_logger(log_file_path):
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger()
+    return logger
+logger = setup_logger(log_file)
 
 
 def load_max_features(params_path: str) -> int:
@@ -28,10 +51,10 @@ def load_max_features(params_path: str) -> int:
             params = yaml.safe_load(file)
             max_features = params['feature_engineering']['max_features']
             model = params['feature_engineering']['model_type']
-            print(f"[INFO]: Running Model with Following Parameters: max_features: {max_features} | model: {model}")
+            logger.info(f"[INFO]: Running Model with Following Parameters: max_features: {max_features} | model: {model}")
             return max_features,model
     except FileNotFoundError:
-        print("[ERROR]: Parameters file not found.")
+        logger.error("[ERROR]: Parameters file not found.")
         raise
     except KeyError:
         print("[ERROR]: Key 'feature_engineering' or 'max_features' not found in parameters file.")
@@ -53,6 +76,7 @@ def create_directories(base_data_dir: str) -> tuple:
     interim_data_path = Path(os.path.join(base_data_dir, "interim"))
     processed_data_path = Path(os.path.join(base_data_dir, "processed"))
     os.makedirs(processed_data_path, exist_ok=True)
+    logger.info(f"[INFO]: Created Processed Data Directory: {processed_data_path}")
     return processed_data_path, interim_data_path
 
 def load_data(interim_data_path: Path) -> tuple:
@@ -75,6 +99,7 @@ def load_data(interim_data_path: Path) -> tuple:
         test_data = pd.read_csv(os.path.join(interim_data_path, 'test_processed.csv'))
         train_data.fillna('', inplace=True)
         test_data.fillna('', inplace=True)
+        logger.info(f"[INFO]: Loaded Train and Test Data.")
         return train_data, test_data
     except FileNotFoundError:
         print("[ERROR]: Data file not found.")
@@ -112,6 +137,7 @@ def apply_bag_of_words(train_data: pd.DataFrame, test_data: pd.DataFrame, max_fe
     os.makedirs(base_model_dir, exist_ok=True)
     vectorizer_file_path = os.path.join(base_model_dir,"vectorizer.pkl")
     pickle.dump(vectorizer, open(vectorizer_file_path,'wb'))
+    logger.info(f"[INFO]: Applied Bag of Words with {max_features} features.")
     return X_train_bow, y_train, X_test_bow, y_test
 
 def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features: int) -> tuple:

@@ -7,6 +7,7 @@ stages:
     - data_ingestion.test_size
     outs:
     - data/raw
+    - logs/data_ingestion.log
 
   data_preprocessing:
     cmd: python src/data/data_preprocessing.py
@@ -15,6 +16,7 @@ stages:
     - data/raw
     outs:
     - data/interim
+    - logs/data_preprocessing.log
 
   feature_engineering:
     cmd: python src/features/feature_engineering.py
@@ -27,6 +29,7 @@ stages:
     outs:
     - data/processed
     - models/vectorizer.pkl
+    - logs/feature_engineering.log
 
   model_building:
     cmd: python src/models/model_building.py
@@ -40,6 +43,7 @@ stages:
     - model_building.max_depth
     outs:
     - models/model.pkl
+    - logs/model_building.log
 
   model_evaluation:
     cmd: python src/models/evaluate.py
@@ -56,6 +60,8 @@ stages:
     deps:
     - models/model.pkl
     - src/models/register_model.py
+    outs:
+    - logs/model_registration.log
 
 params:
 - dvclive/params.yaml

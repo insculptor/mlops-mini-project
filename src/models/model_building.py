@@ -7,21 +7,29 @@ import logging
 import yaml
 from sklearn.linear_model import LogisticRegression
 
+
+# Setup Paths
 base_dir = Path(__file__).resolve().parents[2]
 print(f"[INFO]: Base Directory:", base_dir)
-logger_path = Path(os.path.join(base_dir, "logs"))
-
+base_data_dir = os.path.join(base_dir, "data")
+os.makedirs(base_data_dir, exist_ok=True)
+raw_data_path = os.path.join(base_data_dir, "raw")
+os.makedirs(raw_data_path, exist_ok=True)
+logger_path = os.path.join(base_dir, "logs")
+os.makedirs(os.path.dirname(logger_path), exist_ok=True)
+log_file = os.path.join(logger_path, "model_building.log")
 ## Logging Configuration
-logger = logging.getLogger(os.path.join(logger_path, "model_building.log"))
-logger.setLevel(logging.DEBUG)
+def setup_logger(log_file_path):
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger()
+    return logger
+logger = setup_logger(log_file)
 
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-
-logger.addHandler(console_handler)
 
 def load_model_parameters(params_path: str) -> dict:
     """
@@ -41,16 +49,16 @@ def load_model_parameters(params_path: str) -> dict:
     try:
         with open(params_path, 'r') as file:
             parameters = yaml.safe_load(file)['model_building']
-            print(f"[INFO]: Running Model with Following Parameters: n_estimators: {parameters['n_estimators']} | max_depth: {parameters['max_depth']} | learning_rate: {parameters['learning_rate']}")
+            logger.info(f"[INFO]: Running Model with Following Parameters: n_estimators: {parameters['n_estimators']} | max_depth: {parameters['max_depth']} | learning_rate: {parameters['learning_rate']}")
             return parameters
     except FileNotFoundError:
-        print("[ERROR]: Parameters file not found.")
+        logger.info("[ERROR]: Parameters file not found.")
         raise
     except KeyError:
-        print("[ERROR]: Required keys not found in parameters file.")
+        logger.info("[ERROR]: Required keys not found in parameters file.")
         raise
     except yaml.YAMLError as exc:
-        print(f"[ERROR]: Error parsing YAML file: {exc}")
+        logger.info(f"[ERROR]: Error parsing YAML file: {exc}")
         raise
 
 def create_directories(base_model_dir: str, base_data_dir: str) -> tuple:
@@ -91,13 +99,13 @@ def load_data(processed_data_path: Path) -> tuple:
         test_data.fillna('', inplace=True)
         return train_data, test_data
     except FileNotFoundError:
-        print("[ERROR]: Data file not found.")
+        logger.info("[ERROR]: Data file not found.")
         raise
     except pd.errors.EmptyDataError:
-        print("[ERROR]: Data file is empty.")
+        logger.info("[ERROR]: Data file is empty.")
         raise
     except pd.errors.ParserError as exc:
-        print(f"[ERROR]: Error parsing CSV file: {exc}")
+        logger.info(f"[ERROR]: Error parsing CSV file: {exc}")
         raise
 
 def train_model(X_train: np.ndarray, y_train: np.ndarray, parameters: dict) -> LogisticRegression:
@@ -118,7 +126,7 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray, parameters: dict) -> L
         logger.debug('Model training completed')
         return clf
     except Exception as e:
-        print(f"[ERROR]: Error training model: {e}")
+        logger.error(f"[ERROR]: Error training model: {e}")
         raise
 
 def save_model(model: LogisticRegression, model_path: Path) -> None:
@@ -136,7 +144,7 @@ def save_model(model: LogisticRegression, model_path: Path) -> None:
         with open(os.path.join(model_path, 'model.pkl'), 'wb') as file:
             pickle.dump(model, file)
     except IOError as e:
-        print(f"[ERROR]: Error saving model: {e}")
+        logger.error(f"[ERROR]: Error saving model: {e}")
         raise
 
 def main():
@@ -154,12 +162,12 @@ def main():
         train_data, test_data = load_data(processed_data_path)
         X_train = train_data.iloc[:, 0:-1].values
         y_train = train_data.iloc[:, -1].values
-        print(X_train.shape)
-        print(y_train.shape)
+        logger.info(X_train.shape)
+        logger.info(y_train.shape)
         xgb_model = train_model(X_train, y_train, parameters)
         save_model(xgb_model, model_path)
     except Exception as e:
-        print(f"[ERROR]: {e}")
+        logger.error(f"[ERROR]: {e}")
 
 if __name__ == '__main__':
     main()

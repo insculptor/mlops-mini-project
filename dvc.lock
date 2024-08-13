@@ -3,14 +3,10 @@ stages:
   data_ingestion:
     cmd: python src/data/data_ingestion.py
     deps:
-    - path: C:\Users\erdrr\OneDrive\Desktop\KB\Projects\EXTERNAL_DATA\tweet_emotions.csv
-      hash: md5
-      md5: 49fec64512508d3c26b32944337b89c5
-      size: 3768204
     - path: src/data/data_ingestion.py
       hash: md5
-      md5: f66e6d957ab71a3cfa2391a47ac8e664
-      size: 5472
+      md5: 694052f26b0c83909b64ff2d65dd0752
+      size: 5525
     params:
       params.yaml:
         data_ingestion.test_size: 0.25
@@ -20,6 +16,10 @@ stages:
       md5: 45fd8b56512600a85086dd91d8af6950.dir
       size: 1006158
       nfiles: 2
+    - path: logs/data_ingestion.log
+      hash: md5
+      md5: 3354c92429c394343b9498b382bfcc2f
+      size: 656
   data_preprocessing:
     cmd: python src/data/data_preprocessing.py
     deps:
@@ -30,14 +30,18 @@ stages:
       nfiles: 2
     - path: src/data/data_preprocessing.py
       hash: md5
-      md5: 552380683b4c267aa00f1bd2ab5c65e4
-      size: 7236
+      md5: b0a49de257473a38d40e420e44ad1120
+      size: 7680
     outs:
     - path: data/interim
       hash: md5
       md5: 99289db82ecbc7d20524c5bfef06cb2e.dir
       size: 693605
       nfiles: 2
+    - path: logs/data_preprocessing.log
+      hash: md5
+      md5: 873ba88f5d95c8f7f227254c4126da0a
+      size: 580
   feature_engineering:
     cmd: python src/features/feature_engineering.py
     deps:
@@ -48,8 +52,8 @@ stages:
       nfiles: 2
     - path: src/features/feature_engineering.py
       hash: md5
-      md5: e9903ad2e3257c083e52418a29e35f93
-      size: 7788
+      md5: dedb44da33e242751ed27149a12f606d
+      size: 8884
     params:
       params.yaml:
         feature_engineering.max_features: 5000
@@ -60,6 +64,10 @@ stages:
       md5: bd1a8e0998ba8439974ac766eb13303f.dir
       size: 277412373
       nfiles: 2
+    - path: logs/feature_engineering.log
+      hash: md5
+      md5: f0b649bbcac52c3bcb3628b7b4287571
+      size: 362
     - path: models/vectorizer.pkl
       hash: md5
       md5: dcd78eb55e91b0526308aec827cbb44d
@@ -78,14 +86,18 @@ stages:
       size: 159425
     - path: src/models/model_building.py
       hash: md5
-      md5: 6a81619865a36d48d1e781f77f4f42d8
-      size: 5832
+      md5: e939957110dbe9e9488d9041b9fa9642
+      size: 6209
     params:
       params.yaml:
         model_building.learning_rate: 0.1
         model_building.max_depth: None
         model_building.n_estimators: 5000
     outs:
+    - path: logs/model_building.log
+      hash: md5
+      md5: 4968c8d45cf54470a8508235d2f26111
+      size: 253
     - path: models/model.pkl
       hash: md5
       md5: ba215b23b180388248289ea30acaa5a2
@@ -99,8 +111,8 @@ stages:
       size: 40716
     - path: src/models/evaluate.py
       hash: md5
-      md5: ca0b5a155ac30413055ce19edbfc8afb
-      size: 7709
+      md5: d774a6ee5675fd664017b792c0dec073
+      size: 9390
     outs:
     - path: reports/metrics.json
       hash: md5
@@ -108,7 +120,7 @@ stages:
       size: 145
     - path: reports/model_info.json
       hash: md5
-      md5: 68f4244f0ed1ee0b97b41d0a8d7d43b1
+      md5: 94df4fc86f69d2a610a83231ae01eb47
       size: 82
   model_registration:
     cmd: python src/models/register_model.py
@@ -119,5 +131,10 @@ stages:
       size: 40716
     - path: src/models/register_model.py
       hash: md5
-      md5: 4a36cb0c5dc385ead1b878b025e92bcc
-      size: 2903
+      md5: 0e5c29b54d5ffe02af3f5b45816606c2
+      size: 3676
+    outs:
+    - path: logs/model_registration.log
+      hash: md5
+      md5: 821b353d53f92f64ae0c2b6efebb481c
+      size: 461

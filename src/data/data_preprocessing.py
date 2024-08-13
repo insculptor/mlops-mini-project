@@ -10,9 +10,27 @@ from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 import logging
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s]: %(message)s')
 
+### Setup Paths
+base_dir = Path(__file__).resolve().parents[2]
+print(f"[INFO]: Base Directory:", base_dir)
+base_data_dir = os.path.join(base_dir, "data")
+logger_path = os.path.join(base_dir, "logs")
+os.makedirs(os.path.dirname(logger_path), exist_ok=True)
+log_file = os.path.join(logger_path, "data_preprocessing.log")
+
+
+## Logging Configuration
+def setup_logger(log_file_path):
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger()
+    return logger
+logger = setup_logger(log_file)
 
 
 def create_directories(base_data_dir: str) -> tuple:
@@ -225,9 +243,6 @@ def main():
     """
     try:
         # Get the base directory where the Python script is running
-        base_dir = Path(__file__).resolve().parents[2]
-        print(f"[INFO]: Base Directory:", base_dir)
-        base_data_dir = os.path.join(base_dir, "data")
         raw_data_path, interim_data_path = create_directories(base_data_dir)
         train_data, test_data = load_data(raw_data_path)
         download_nltk_resources()
