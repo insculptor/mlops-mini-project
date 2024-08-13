@@ -6,8 +6,18 @@ import dagshub
 from pathlib import Path
 
 
+
+# Set up the MLflow tracking URI
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+# Set the MLflow tracking URI
 mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
-dagshub.init(repo_owner='insculptor', repo_name='mlops-mini-project', mlflow=True)  
+
 
 base_dir = Path(__file__).resolve().parents[2]
 print(f"[INFO]: Base Directory:", base_dir)
