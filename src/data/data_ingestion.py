@@ -4,16 +4,15 @@ import numpy as np
 import pandas as pd
 import yaml
 import logging
-from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 
-# Load environment variables from .env file
-load_dotenv()
 
-# Get PYTHONPATH from environment variable
-base_dir = Path(os.getenv('BASE_DIR'))
-base_data_dir = Path(os.getenv('BASE_DATA_DIR'))
-external_data_path = Path(os.getenv('EXTERNAL_DATA_DIR'))
+
+# Get the base directory where the Python script is running
+base_dir = Path(__file__).resolve().parents[2]
+print(f"[INFO]: Base Directory:", base_dir)
+base_data_dir = os.path.join(base_dir, "data")
+os.makedirs(base_data_dir, exist_ok=True)
 raw_data_path = os.path.join(base_data_dir, "raw")
 os.makedirs(raw_data_path, exist_ok=True)
 logger_path = os.path.join(base_dir, "logs")
@@ -148,8 +147,7 @@ def main():
     """
     try:
         params_path = 'params.yaml'
-        test_size = load_params(params_path)
-        #df = read_data(data_url='https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv')
+        test_size = load_params(params_path)        
         df = pd.read_csv('https://raw.githubusercontent.com/campusx-official/jupyter-masterclass/main/tweet_emotions.csv')
         df = process_data(df)
         save_data(df, test_size, raw_data_path)

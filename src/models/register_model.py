@@ -4,15 +4,18 @@ import logging
 import mlflow
 import dagshub
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
+
 
 mlflow.set_tracking_uri('https://dagshub.com/insculptor/mlops-mini-project.mlflow')
 dagshub.init(repo_owner='insculptor', repo_name='mlops-mini-project', mlflow=True)  
 
-base_model_dir = Path(os.environ["BASE_MODELS_DIR"])
-base_data_dir = Path(os.environ["BASE_DATA_DIR"])
-base_dir = Path(os.environ["BASE_DIR"])
+base_dir = Path(__file__).resolve().parents[2]
+print(f"[INFO]: Base Directory:", base_dir)
+base_model_dir = os.path.join(base_dir, "models")
+os.makedirs(base_model_dir, exist_ok=True)
+base_data_dir = os.path.join(base_dir, "data")
+
+
 model_path = os.path.join(Path(base_model_dir), "model.pkl")
 logger_path = os.path.join(base_dir, "model_registration.log")
 

@@ -9,13 +9,12 @@ import mlflow
 import dagshub
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 from dvclive import Live
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
 
-reports_path = Path(os.getenv("BASE_REPORTS_DIR"))
+base_dir = Path(__file__).resolve().parents[2]
+reports_path = os.path.join(base_dir, "reports")
 os.makedirs(reports_path, exist_ok=True)
+
 
 
 def create_directories(base_data_dir: str) -> Path:
@@ -177,8 +176,11 @@ def main():
     """
     Main function to load model, load test data, evaluate model, and save evaluation metrics.
     """
-    base_model_dir = Path(os.environ["BASE_MODELS_DIR"])
-    base_data_dir = Path(os.environ["BASE_DATA_DIR"])
+    base_dir = Path(__file__).resolve().parents[2]
+    print(f"[INFO]: Base Directory:", base_dir)
+    base_model_dir = os.path.join(base_dir, "models")
+    os.makedirs(base_model_dir, exist_ok=True)
+    base_data_dir = os.path.join(base_dir, "data")
     model_path = os.path.join(Path(base_model_dir), "model.pkl")
     features_path = create_directories(base_data_dir)
     

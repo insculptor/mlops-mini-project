@@ -6,10 +6,7 @@ import yaml
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
 
 def load_max_features(params_path: str) -> int:
     """
@@ -110,7 +107,10 @@ def apply_bag_of_words(train_data: pd.DataFrame, test_data: pd.DataFrame, max_fe
     X_train_bow = vectorizer.fit_transform(X_train)
     X_test_bow = vectorizer.transform(X_test)
     
-    vectorizer_file_path = os.path.join(Path(os.environ["BASE_MODELS_DIR"]),"vectorizer.pkl")
+    base_dir = Path(__file__).resolve().parents[2]
+    base_model_dir = os.path.join(base_dir, "models")
+    os.makedirs(base_model_dir, exist_ok=True)
+    vectorizer_file_path = os.path.join(base_model_dir,"vectorizer.pkl")
     pickle.dump(vectorizer, open(vectorizer_file_path,'wb'))
     return X_train_bow, y_train, X_test_bow, y_test
 
@@ -135,7 +135,10 @@ def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features:
     X_train_bow = vectorizer.fit_transform(X_train)
     X_test_bow = vectorizer.transform(X_test)
     
-    vectorizer_file_path = os.path.join(Path(os.environ["BASE_MODELS_DIR"]),"vectorizer.pkl")
+    base_dir = Path(__file__).resolve().parents[2]
+    base_model_dir = os.path.join(base_dir, "models")
+    os.makedirs(base_model_dir, exist_ok=True)
+    vectorizer_file_path = os.path.join(base_model_dir,"vectorizer.pkl")
     pickle.dump(vectorizer, open(vectorizer_file_path,'wb'))
 
     return X_train_bow, y_train, X_test_bow, y_test
@@ -167,7 +170,14 @@ def main():
     """
     try:
         max_features, model = load_max_features('params.yaml')
-        base_data_dir = os.environ["BASE_DATA_DIR"]
+        # Get the base directory where the Python script is running
+        base_dir = Path(__file__).resolve().parents[2]
+        print(f"[INFO]: Base Directory:", base_dir)
+        base_data_dir = os.path.join(base_dir, "data")
+        os.makedirs(base_data_dir, exist_ok=True)
+        raw_data_path = os.path.join(base_data_dir, "raw")
+        os.makedirs(raw_data_path, exist_ok=True)
+        logger_path = os.path.join(base_dir, "logs")
         processed_data_path, interim_data_path = create_directories(base_data_dir)
         train_data, test_data = load_data(interim_data_path)
         

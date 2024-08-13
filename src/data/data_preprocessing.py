@@ -8,14 +8,12 @@ from pathlib import Path
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
-from dotenv import load_dotenv
 import logging
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s]: %(message)s')
 
-# Load environment variables from .env file
-load_dotenv()
+
 
 def create_directories(base_data_dir: str) -> tuple:
     """
@@ -226,7 +224,10 @@ def main():
     Main function to execute data preprocessing steps.
     """
     try:
-        base_data_dir = os.environ["BASE_DATA_DIR"]
+        # Get the base directory where the Python script is running
+        base_dir = Path(__file__).resolve().parents[2]
+        print(f"[INFO]: Base Directory:", base_dir)
+        base_data_dir = os.path.join(base_dir, "data")
         raw_data_path, interim_data_path = create_directories(base_data_dir)
         train_data, test_data = load_data(raw_data_path)
         download_nltk_resources()

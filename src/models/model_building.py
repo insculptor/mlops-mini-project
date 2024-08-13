@@ -6,12 +6,10 @@ import pickle
 import logging
 import yaml
 from sklearn.linear_model import LogisticRegression
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
-logger_path = Path(os.path.join(Path(os.getenv('BASE_DIR')), "logs"))
+base_dir = Path(__file__).resolve().parents[2]
+print(f"[INFO]: Base Directory:", base_dir)
+logger_path = Path(os.path.join(base_dir, "logs"))
 
 ## Logging Configuration
 logger = logging.getLogger(os.path.join(logger_path, "model_building.log"))
@@ -147,8 +145,11 @@ def main():
     """
     try:
         parameters = load_model_parameters('params.yaml')
-        base_model_dir = os.environ["BASE_MODELS_DIR"]
-        base_data_dir = os.environ["BASE_DATA_DIR"]
+        base_dir = Path(__file__).resolve().parents[2]
+        print(f"[INFO]: Base Directory:", base_dir)
+        base_model_dir = os.path.join(base_dir, "models")
+        os.makedirs(base_model_dir, exist_ok=True)
+        base_data_dir = os.path.join(base_dir, "data")
         model_path, processed_data_path = create_directories(base_model_dir, base_data_dir)
         train_data, test_data = load_data(processed_data_path)
         X_train = train_data.iloc[:, 0:-1].values
