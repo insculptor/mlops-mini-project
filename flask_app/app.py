@@ -8,7 +8,7 @@ import dagshub
 import numpy as np
 import pandas as pd
 from flask import Flask, render_template,request
-from preprocessing_utility import normalize_text
+from from flask_app.preprocessing_utility import normalize_text
 
 
 
